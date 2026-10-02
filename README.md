@@ -10,8 +10,9 @@
 * Multi-Turn Conversation (build on previous prompts and responses)
 * Types of Roles
     1) System: controls assistant's behavior
-    2) User: instructs the assistant
-    3) Assistant: response to user instruction
+        1) System messages can include guardrails to restrict model's output.
+    2) Assistant: response to user instruction
+    3) User: instructs the assistant
 
 
 
