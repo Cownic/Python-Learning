@@ -1,0 +1,106 @@
+# validate_name function
+
+def validate_name(name):
+    """
+    Checks that the name is greater than two characters and is a string data type.
+
+     Args:
+        name (str): The inputted name from the user.
+
+     Returns:
+        bool: True if the name passes the check, False otherwise.
+    """
+    if type(name) == str and len(name) > 2:
+        return True
+    else:
+        return False
+
+# validate_email function
+
+def validate_email(email):
+    """
+    Checks that the email address is in a valid format, has a username greater than 1 character,
+    an '@' symbol, and an allowed domain that is in the `top_level_domains` variable.
+
+    Args:
+        email (str): The inputted email from the user.
+
+    Returns:
+        bool: True if the email passes the checks, False otherwise.
+    """
+    # 1. Type check
+    if not isinstance(email, str):
+        return False
+
+    # 2. Must contain exactly one '@' symbol
+    if email.count("@") != 1:
+        return False
+
+    # Split into username and domain part
+    username, domain_part = email.split("@")
+
+    # 3. Username must be greater than 1 character
+    if len(username) <= 1:
+        return False
+
+    # 4. Domain part must end with one of the allowed top-level domains
+    has_valid_domain = any(domain_part.endswith(tld) for tld in top_level_domains)
+    if not has_valid_domain:
+        return False
+
+    return True
+
+
+def validate_pass(password):
+    """
+    Checks that the password is strong enough. It should include a capital letter,
+    a number between 0-9 and be greater than 8 characters.
+
+    Args:
+        password (str): The inputted password from the user.
+
+    Returns:
+        bool: True if the password passes the checks, False otherwise.
+    """
+    # 1. Type check
+    if not isinstance(password, str):
+        return False
+
+    # 2. Length must be greater than 8 characters
+    if len(password) <= 8:
+        return False
+
+    # 3. Must contain at least one uppercase letter
+    has_capital = any(char.isupper() for char in password)
+
+    # 4. Must contain at least one digit (0-9)
+    has_digit = any(char.isdigit() for char in password)
+
+    return has_capital and has_digit
+
+
+# validate user function
+def validate_user(name, email, password):
+    if not validate_name(name):
+        raise ValueError("Invalid name: must be a string and greater than 2 characters.")
+    
+    if not validate_email(email):
+        raise ValueError("Invalid email: must be a valid format with an allowed domain.")
+        
+    if not validate_pass(password):
+        raise ValueError("Invalid password: must contain an uppercase letter, a digit, and be > 8 characters.")
+        
+    return True
+
+
+# register_user function
+def register_user(name, email, password):
+    try:
+        validate_user(name, email, password)
+        return {
+        "name": name,
+        "email": email,
+        "password": password}
+    except ValueError:
+        return False
+
