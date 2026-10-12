@@ -1,103 +1,144 @@
-# Introduction to the OpenAI API
+"""OpenAI API learning exercises.
+
+This file is organized into small, readable examples. Each example shows a different
+OpenAI use case and can be run independently.
+
+Before running the examples, set your API key in the environment:
+    export OPENAI_API_KEY="your-api-key"
+
+or replace the placeholder in get_client().
+"""
+
+import os
 
 from openai import OpenAI
 
-# Create the OpenAI client#
-client = OpenAI(api_key="<OPENAI_API_TOKEN>")
 
-# Create a request to the Chat Completions endpoint
-response = client.chat.completions.create(
-  model="gpt-4o-mini",
-  messages=[
-    {"role": "user", 
-     "content": "Write a polite reply accepting an AI Engineer job offer."}]
-)
+def get_client() -> OpenAI:
+    """Create and return an OpenAI client using the environment variable."""
+    api_key = os.getenv("OPENAI_API_KEY") or "<OPENAI_API_TOKEN>"
+    return OpenAI(api_key=api_key)
 
-print(response)
-print(response.choices[0].message.content)
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Prompting OpenAI Models #
-"""Text Editing with OpenAI API"""
-client = OpenAI(api_key="<OPENAI_API_TOKEN>")
+def print_text(response) -> None:
+    """Print the model's text response clearly."""
+    print(response.choices[0].message.content)
 
-prompt="""Replace car with plane and adjust phrase:
+
+# ---------------------------------------------------------------------------
+# 1. Introduction
+# ---------------------------------------------------------------------------
+
+def intro_example() -> None:
+    """Basic Chat Completions request."""
+    client = get_client()
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "user",
+                "content": "Write a polite reply accepting an AI Engineer job offer.",
+            }
+        ],
+    )
+
+    print("--- Intro Example ---")
+    print_text(response)
+
+
+# ---------------------------------------------------------------------------
+# 2. Prompting and text transformation
+# ---------------------------------------------------------------------------
+
+def text_editing_example() -> None:
+    """Rewrite a paragraph by replacing terms and adjusting wording."""
+    client = get_client()
+
+    prompt = """Replace car with plane and adjust phrase:
 A car is a vehicle that is typically powered by an internal combustion engine or an electric motor. It has four wheels, and is designed to carry passengers and/or cargo on roads or highways. Cars have become a ubiquitous part of modern society, and are used for a wide variety of purposes, such as commuting, travel, and transportation of goods. Cars are often associated with freedom, independence, and mobility."""
 
-# Create a request to the Chat Completions endpoint
-response = client.chat.completions.create(
-  model="gpt-4o-mini",
-  messages=[{"role": "user", "content": prompt}],
-  max_completion_tokens=100
-)
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        max_completion_tokens=100,
+    )
 
-# Extract and print the response text
-print(response.choices[0].message.content)
+    print("--- Text Editing Example ---")
+    print_text(response)
 
 
-"""Text Summarization with OpenAI API"""
-client = OpenAI(api_key="<OPENAI_API_TOKEN>")
-finance_text = """The global financial markets have experienced significant volatility in recent months, driven by a combination of geopolitical tensions, economic uncertainty, and shifts in investor sentiment. Central banks around the world have been adjusting interest rates in response to inflationary pressures, while governments have implemented various fiscal policies to stimulate growth. Investors are closely monitoring corporate earnings reports, as well as macroeconomic indicators such as employment data and consumer spending trends, to gauge the health of the economy and make informed investment decisions."""
-# Use an f-string to format the prompt
-prompt = f"""Summarize the following text into two concise bullet points:
+def text_summarization_example() -> None:
+    """Summarize a finance paragraph into two concise bullet points."""
+    client = get_client()
+
+    finance_text = """The global financial markets have experienced significant volatility in recent months, driven by a combination of geopolitical tensions, economic uncertainty, and shifts in investor sentiment. Central banks around the world have been adjusting interest rates in response to inflationary pressures, while governments have implemented various fiscal policies to stimulate growth. Investors are closely monitoring corporate earnings reports, as well as macroeconomic indicators such as employment data and consumer spending trends, to gauge the health of the economy and make informed investment decisions."""
+
+    prompt = f"""Summarize the following text into two concise bullet points:
 {finance_text}"""
 
-# Create a request to the Chat Completions endpoint
-response = client.chat.completions.create(
-  model="gpt-4o-mini",
-  messages=[{"role": "user", "content": prompt}],
-  max_completion_tokens=400
-)
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        max_completion_tokens=400,
+    )
 
-print(response.choices[0].message.content)
-
-"""Token Counting and Cost Estimation with OpenAI API"""
-client = OpenAI(api_key="<OPENAI_API_TOKEN>")
-max_completion_tokens = 100
-response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[{"role": "user", "content": prompt}],
-    max_completion_tokens=max_completion_tokens
-)
-
-input_token_price = 0.15 / 1_000_000
-output_token_price = 0.6 / 1_000_000
-
-# Extract token usage
-input_tokens = response.usage.prompt_tokens
-output_tokens = max_completion_tokens
-# Calculate cost
-cost = (input_tokens * input_token_price + output_tokens * output_token_price)
-print(f"Estimated cost: ${cost}")
+    print("--- Text Summarization Example ---")
+    print_text(response)
 
 
-"""Text Generation with OpenAI API"""
-client = OpenAI(api_key="<OPENAI_API_TOKEN>")
+def cost_estimation_example() -> None:
+    """Estimate API cost using token usage from a response."""
+    client = get_client()
 
-# Create a detailed prompt
-prompt = """
+    prompt = """Summarize the following text into two concise bullet points:
+The global financial markets have experienced significant volatility in recent months, driven by a combination of geopolitical tensions, economic uncertainty, and shifts in investor sentiment."""
+
+    max_completion_tokens = 100
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        max_completion_tokens=max_completion_tokens,
+    )
+
+    input_token_price = 0.15 / 1_000_000
+    output_token_price = 0.6 / 1_000_000
+
+    input_tokens = response.usage.prompt_tokens
+    output_tokens = response.usage.completion_tokens
+    cost = (input_tokens * input_token_price) + (output_tokens * output_token_price)
+
+    print("--- Cost Estimation Example ---")
+    print(f"Estimated cost: ${cost:.8f}")
+
+
+def prompt_creation_example() -> None:
+    """Generate a product description prompt for a headphone product."""
+    client = get_client()
+
+    prompt = """
 Create a detailed prompt to generate a product description for SonicPro headphones, including:
-Active noise cancellation (ANC)
-40-hour battery life
-Foldable design
+- Active noise cancellation (ANC)
+- 40-hour battery life
+- Foldable design
 """
 
-response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[{"role": "user", "content": prompt}],
-    # Experiment with max_completion_tokens and temperature settings
-    max_completion_tokens=400,
-    temperature=0
-)
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        max_completion_tokens=400,
+        temperature=0,
+    )
 
-print(response.choices[0].message.content)
+    print("--- Prompt Creation Example ---")
+    print_text(response)
 
 
-"""shot prompting with OpenAI API"""
-client = OpenAI(api_key="<OPENAI_API_TOKEN>")
+def few_shot_prompting_example() -> None:
+    """Use a few-shot example to classify sentiment with a pattern."""
+    client = get_client()
 
-# Add the final example
-prompt = """Classify sentiment as 1-5 (negative to positive):
+    prompt = """Classify sentiment as 1-5 (negative to positive):
 1. Comfortable, but not very pretty = 2
 2. Love these! = 5
 3. Unbelievably good! = 
@@ -105,74 +146,103 @@ prompt = """Classify sentiment as 1-5 (negative to positive):
 5. The shoes look nice, but they aren't very comfortable. = 
 6. Can't wait to show them off! = """
 
-response = client.chat.completions.create(model="gpt-4o-mini", messages=[{"role": "user", "content": prompt}], max_completion_tokens=100)
-print(response.choices[0].message.content)
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        max_completion_tokens=100,
+    )
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Building Conversation with the OpenAI API#
-"""Utilizing system messages to guide the model's behavior, adding guardrails, and creating a multi-turn conversation with the OpenAI API."""
-client = OpenAI(api_key="<OPENAI_API_TOKEN>")
+    print("--- Few-Shot Prompting Example ---")
+    print_text(response)
 
-sys_msg = """You are a study planning assistant that creates plans for learning new skills.
 
-If these skills are non related to languages, return the message:
+# ---------------------------------------------------------------------------
+# 3. Conversations and system messages
+# ---------------------------------------------------------------------------
 
+def system_message_example() -> None:
+    """Use a system prompt to keep the model within a behavior guardrail."""
+    client = get_client()
+
+    system_message = """You are a study planning assistant that creates plans for learning new skills.
+
+If the skill is not related to languages, return this exact message:
 'Apologies, to focus on languages, we no longer create learning plans on other topics.'
 """
 
-# Create a request to the Chat Completions endpoint
-response = client.chat.completions.create(
-  model="gpt-4o-mini",
-  messages=[
-    {"role": "system", "content": sys_msg},
-    {"role": "user", "content": "Help me learn to Chinese."}
-  ]
-)
-
-print(response.choices[0].message.content)
-
-
-# Adding Assistant Messages to fine-tune the result
-client = OpenAI(api_key="<OPENAI_API_TOKEN>")
-
-response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    # Add a user and assistant message for in-context learning
-    messages=[
-        {"role": "system", "content": "You are a helpful Geography tutor that generates concise summaries for different countries."},
-        {"role": "user", "content": "Give me a quick summary of Portugal"},
-        {"role": "assistant", "content": "Portugal is a country in Europe that borders Spain. The capital city is Lisboa."},
-        {"role": "user", "content": "Give me a quick summary of Greece."}
-    ]
-)
-
-print(response.choices[0].message.content)
-
-# Multi Conversation with GPT
-client = OpenAI(api_key="<OPENAI_API_TOKEN>")
-
-messages = [{"role": "system", "content": "You are a helpful math tutor that speaks concisely."}]
-user_msgs = ["Explain what pi is.", "Summarize this in two bullet points."]
-
-# Loop over the user questions
-for q in user_msgs:
-    print("User: ", q)
-    
-    # Create a dictionary for the user message from q and append to messages
-    user_dict = {"role": "user", "content": q}
-    messages.append(user_dict)
-    
-    # Create the API request
     response = client.chat.completions.create(
         model="gpt-4o-mini",
-        message=messages,
-        max_completion_tokens=100
+        messages=[
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": "Help me learn Chinese."},
+        ],
     )
-    
-    # Append the assistant's message to messages
-    assistant_dict = {"role": "assistant", "content": response.choices[0].message.content}
-    messages.append(assistant_dict)
-    print("Assistant: ", response.choices[0].message.content, "\n")
+
+    print("--- System Message Example ---")
+    print_text(response)
+
+
+def assistant_memory_example() -> None:
+    """Add assistant messages to provide in-context examples."""
+    client = get_client()
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a helpful Geography tutor that generates concise summaries for different countries.",
+            },
+            {"role": "user", "content": "Give me a quick summary of Portugal."},
+            {
+                "role": "assistant",
+                "content": "Portugal is a country in Europe that borders Spain. The capital city is Lisboa.",
+            },
+            {"role": "user", "content": "Give me a quick summary of Greece."},
+        ],
+    )
+
+    print("--- Assistant Memory Example ---")
+    print_text(response)
+
+
+def multi_turn_conversation_example() -> None:
+    """Create a short multi-turn conversation that keeps context across messages."""
+    client = get_client()
+
+    messages = [{"role": "system", "content": "You are a helpful math tutor that speaks concisely."}]
+    user_msgs = ["Explain what pi is.", "Summarize this in two bullet points."]
+
+    for question in user_msgs:
+        print(f"User: {question}")
+        messages.append({"role": "user", "content": question})
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            max_completion_tokens=100,
+        )
+
+        answer = response.choices[0].message.content
+        messages.append({"role": "assistant", "content": answer})
+        print(f"Assistant: {answer}\n")
+
+
+# ---------------------------------------------------------------------------
+# Run the examples
+# ---------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    # Uncomment the examples you want to run.
+    intro_example()
+    text_editing_example()
+    text_summarization_example()
+    cost_estimation_example()
+    prompt_creation_example()
+    few_shot_prompting_example()
+    system_message_example()
+    assistant_memory_example()
+    multi_turn_conversation_example()
 
 
 
