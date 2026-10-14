@@ -74,6 +74,8 @@ python -c "import os; from dotenv import load_dotenv; from groq import Groq; loa
 
 ---
 
+
+
 ## 2. Firewall Audit Checklist
 
 Use this checklist to perform rule hygiene, access boundary validation, and security posture assessments across rulebases.
