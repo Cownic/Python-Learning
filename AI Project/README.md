@@ -100,3 +100,17 @@ Use this checklist to perform rule hygiene, access boundary validation, and secu
 - [ ] **Exclude Management IP:** Confirm that firewall and host management IPs are strictly excluded from general transit and NAT policies.
 - [ ] **Enforce Stateful Inspection:** Audit policies to verify no stateless firewall rules exist where stateful connection tracking is required.
 - [ ] **Decommission Legacy Services:** Remove legacy protocols and cipher configurations (e.g., Telnet, FTP, SMBv1, SNMPv1/v2c).
+
+---
+
+## 3. Switch Security Auditor
+
+Run the Streamlit switch checker from the project directory:
+
+```bash
+streamlit run switch-checker.py
+```
+
+The checker accepts one or more normalized switch inventory JSON files at a time; it does not parse vendor-native configuration files. Each file is validated and audited independently, with findings grouped under that file's name. A clean starter inventory is provided in `sample-switch-inventory.json`, and `test-switch-violations.json` exercises the deterministic finding rules. Each switch can include its management IP/VLAN, SSH/Telnet, AAA and SNMP settings, plus interface mode, VLAN, spanning-tree, and port-security settings. Optional top-level `approved_management_subnets`, `management_vlans`, and `user_vlans` enable additional baseline checks.
+
+The local checks cover duplicate management IPs, Telnet, missing SSH/AAA, insecure SNMP versions, management addressing, access-port VLAN and edge protections, and broad trunks. Upload the violation fixture to verify these findings in the UI; deterministic checks still run if `GROQ_API_KEY` is unavailable, while the Groq-backed audit is skipped. After running an audit, the advisor receives the uploaded inventory and findings for each file. Use **Recommend fixes for all audited uploads** for prioritized remediation steps, impact notes, verification commands and expected results, and rollback guidance. The advisor is limited to switch-security topics; vendor CLI commands are labeled illustrative when the inventory does not identify the platform.
